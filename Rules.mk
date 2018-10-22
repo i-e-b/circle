@@ -24,7 +24,7 @@ endif
 
 -include $(CIRCLEHOME)/Config.mk
 
-RASPPI	?= 1
+RASPPI	?= 2
 PREFIX	?= arm-none-eabi-
 
 # see: doc/stdlib-support.txt
