@@ -1,22 +1,11 @@
 //
-// kernel.cpp
-//
-// Circle - A C++ bare metal environment for Raspberry Pi
-// Copyright (C) 2014-2017  R. Stange <rsta2@o2online.de>
-// 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+// TODO:
+//  [ ] Add a disk image to qemu
+//  [ ] Read disk TOC and content of a file
+//  [ ] Allocate, use, and free some memory
+//  [ ] Write some basic graphics junk (bresenham etc)
+
+
 #include "kernel.h"
 #include <circle/usb/usbkeyboard.h>
 #include <circle/string.h>
@@ -46,24 +35,22 @@ CKernel::~CKernel (void)
 
 void CKernel::box (void) {
 
+	// speed test
+	auto w = m_Screen.GetWidth();
+	auto h = m_Screen.GetHeight();
+	auto c_red = COLOR16 (5, 0, 0);
+	auto c_blue = COLOR16 (0, 0, 5);
+
 	// draw rectangle on screen
-	for (unsigned nPosX = 0; nPosX < m_Screen.GetWidth (); nPosX++)
+	for (unsigned nPosX = 0; nPosX < w; nPosX++)
 	{
-		m_Screen.SetPixel (nPosX, 0, NORMAL_COLOR);
-		m_Screen.SetPixel (nPosX, m_Screen.GetHeight ()-1, NORMAL_COLOR);
+		m_Screen.SetPixel (nPosX, 0, c_blue);
+		m_Screen.SetPixel (nPosX, h-1, c_blue);
 	}
-	for (unsigned nPosY = 0; nPosY < m_Screen.GetHeight (); nPosY++)
+	for (unsigned nPosY = 0; nPosY < h; nPosY++)
 	{
-		m_Screen.SetPixel (0, nPosY, NORMAL_COLOR);
-		m_Screen.SetPixel (m_Screen.GetWidth ()-1, nPosY, NORMAL_COLOR);
-	}
-	// draw cross on screen
-	for (unsigned nPosX = 0; nPosX < m_Screen.GetWidth (); nPosX++)
-	{
-		unsigned nPosY = nPosX * m_Screen.GetHeight () / m_Screen.GetWidth ();
-		auto color = COLOR16 (16, 16, 16);
-		m_Screen.SetPixel (nPosX, nPosY, color);
-		m_Screen.SetPixel (m_Screen.GetWidth ()-nPosX-1, nPosY, color);
+		m_Screen.SetPixel (0, nPosY, c_red);
+		m_Screen.SetPixel (w-1, nPosY, c_red);
 	}
 }
 
@@ -133,14 +120,22 @@ TShutdownMode CKernel::Run (void)
 
 	box();
 
-	for (unsigned nCount = 0; m_ShutdownMode == ShutdownNone; nCount++)
+	// Intro graphic?
+	m_Screen.Write(" ____ ____ ____ ____ \n",22);
+	m_Screen.Write("||M |||E |||C |||S ||\n",22);
+	m_Screen.Write("||__|||__|||__|||__||\n",22);
+	m_Screen.Write("|/__\\|/__\\|/__\\|/__\\|\n",22);
+
+	//for (unsigned nCount = 0; m_ShutdownMode == ShutdownNone; nCount++)
+	while (m_ShutdownMode == ShutdownNone)
 	{
 		// CUSBKeyboardDevice::UpdateLEDs() must not be called in interrupt context,
 		// that's why this must be done here. This does nothing in raw mode.
 		pKeyboard->UpdateLEDs ();
 
-		m_Screen.Rotor (0, nCount);
-		m_Timer.MsDelay (100);
+		//m_Screen.Rotor (0, nCount);
+		//box();
+		m_Timer.MsDelay (500);
 	}
 
 	return m_ShutdownMode;

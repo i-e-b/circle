@@ -36,6 +36,7 @@ boolean CKernel::Initialize (void)
 
 TShutdownMode CKernel::Run (void)
 {
+
 	// draw rectangle on screen
 	for (unsigned nPosX = 0; nPosX < m_Screen.GetWidth (); nPosX++)
 	{
@@ -48,17 +49,26 @@ TShutdownMode CKernel::Run (void)
 		m_Screen.SetPixel (m_Screen.GetWidth ()-1, nPosY, NORMAL_COLOR);
 	}
 
-	// draw cross on screen
-	for (unsigned nPosX = 0; nPosX < m_Screen.GetWidth (); nPosX++)
+	int r = 0, g=0, b=0;
+	while (1)
 	{
-		unsigned nPosY = nPosX * m_Screen.GetHeight () / m_Screen.GetWidth ();
+		// draw cross on screen
+		for (unsigned nPosX = 0; nPosX < m_Screen.GetWidth (); nPosX++)
+		{
+			unsigned nPosY = nPosX * m_Screen.GetHeight () / m_Screen.GetWidth ();
 
-		m_Screen.SetPixel (nPosX, nPosY, NORMAL_COLOR);
-		m_Screen.SetPixel (m_Screen.GetWidth ()-nPosX-1, nPosY, NORMAL_COLOR);
+			auto color = COLOR16 (r, g, b);
+			m_Screen.SetPixel (nPosX, nPosY, color);
+			m_Screen.SetPixel (m_Screen.GetWidth ()-nPosX-1, nPosY, color);
+		}
+		r++;
+		if(r > 31) { g++; r=0; }
+		if(g > 31) { b++; g=0; }
+		if(b > 31) { b = 0; }
 	}
 
 	// check the blink frequency without and with MMU (see option in constructor above)
-	while (1)
+	/*while (1)
 	{
 		m_ActLED.On ();
 		for (volatile unsigned i = 1; i <= 5000000; i++)
@@ -71,7 +81,7 @@ TShutdownMode CKernel::Run (void)
 		{
 			// just wait
 		}
-	}
+	}*/
 
 	return ShutdownHalt;
 }
