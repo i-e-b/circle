@@ -20,7 +20,7 @@
 #include "kernel.h"
 
 CKernel::CKernel (void)
-:	m_Memory (FALSE),	// set this to TRUE to enable MMU and to boost performance
+:	m_Memory (TRUE),	// set this to TRUE to enable MMU and to boost performance
 	m_Screen (m_Options.GetWidth (), m_Options.GetHeight ())
 {
 }
