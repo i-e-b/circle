@@ -116,9 +116,12 @@ TShutdownMode CKernel::Run (void)
 	pKeyboard->RegisterKeyStatusHandlerRaw (KeyStatusHandlerRaw);
 #endif
 
-	m_Logger.Write (FromKernel, LogNotice, "Just type something!");
 
 	box();
+
+	m_Screen.CursorMove(10,10);
+	m_Screen.Write("Hello, world",12);
+	m_Screen.CursorMove(1,1);
 
 	// Intro graphic?
 	m_Screen.Write(" ____ ____ ____ ____ \n",22);

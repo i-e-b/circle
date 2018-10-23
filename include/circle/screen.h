@@ -137,6 +137,17 @@ public:
 	/// \param nCount Phase (angle) of the current rotor symbol (0..3)
 	void Rotor (unsigned nIndex, unsigned nCount);
 
+	/// \brief Set text cursor position in absolute co-ordinates
+	/// \param nRow  0-based y position
+	/// \param nColumn  0-based x position
+	void CursorMove (unsigned nRow, unsigned nColumn);
+
+	/// \brief Move to next tab position. May start a new line
+	void Tabulator (void);
+
+	/// \brief Get raw frame buffer
+	TScreenColor* RawFrameBuffer(void);
+
 private:
 	void Write (char chChar);
 
@@ -146,7 +157,6 @@ private:
 	void CursorDown (void);
 	void CursorHome (void);
 	void CursorLeft (void);
-	void CursorMove (unsigned nRow, unsigned nColumn);
 	void CursorRight (void);
 	void CursorUp (void);
 	void DeleteChars (unsigned nCount);
@@ -160,7 +170,6 @@ private:
 	void SetCursorMode (boolean bVisible);
 	void SetScrollRegion (unsigned nStartRow, unsigned nEndRow);
 	void SetStandoutMode (unsigned nMode);
-	void Tabulator (void);
 
 	void Scroll (void) MAXOPT;
 

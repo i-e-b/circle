@@ -571,6 +571,7 @@ void CScreenDevice::CursorLeft (void)
 
 void CScreenDevice::CursorMove (unsigned nRow, unsigned nColumn)
 {
+	InvertCursor();
 	unsigned nPosX = (nColumn - 1) * m_CharGen.GetCharWidth ();
 	unsigned nPosY = (nRow - 1) * m_CharGen.GetCharHeight ();
 
@@ -581,6 +582,7 @@ void CScreenDevice::CursorMove (unsigned nRow, unsigned nColumn)
 		m_nCursorX = nPosX;
 		m_nCursorY = nPosY;
 	}
+	InvertCursor();
 }
 
 void CScreenDevice::CursorRight (void)
@@ -811,6 +813,10 @@ TScreenColor CScreenDevice::GetPixel (unsigned nPosX, unsigned nPosY)
 	}
 	
 	return BLACK_COLOR;
+}
+
+TScreenColor* CScreenDevice::RawFrameBuffer(void){
+	return m_pBuffer;
 }
 
 void CScreenDevice::Rotor (unsigned nIndex, unsigned nCount)
