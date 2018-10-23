@@ -87,3 +87,6 @@ Config.mk
 doc/html/
 test/
 tmp/
+.idea/
+cmake-build-debug/
+

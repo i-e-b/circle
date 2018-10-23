@@ -602,8 +602,13 @@ void CScreenDevice::CursorUp (void)
 	}
 }
 
-void CScreenDevice::DeleteChars (unsigned nCount)	// TODO
-{
+void CScreenDevice::DeleteChars (unsigned nCount) {
+	InvertCursor();
+	for (unsigned i; i < nCount; i++) {
+		CursorLeft();
+	}
+	EraseChars(nCount);
+	InvertCursor();
 }
 
 void CScreenDevice::DeleteLines (unsigned nCount)	// TODO

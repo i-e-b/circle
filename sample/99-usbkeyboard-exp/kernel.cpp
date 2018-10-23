@@ -33,25 +33,60 @@ CKernel::~CKernel (void)
 	s_pThis = 0;
 }
 
+static void Bresenham(CScreenDevice dev, int x0, int x1, int y0, int y1, TScreenColor color) {
+    int dx = x1-x0, sx = x0<x1 ? 1 : -1;
+    int dy = y1-y0, sy = y0<y1 ? 1 : -1;
+
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
+
+    int err = (dx>dy ? dx : -dy)/2, e2;
+
+    for(;;){
+        dev.SetPixel (x0, y0, color);
+        if (x0==x1 && y0==y1) break;
+        e2 = err;
+        if (e2 >-dx) { err -= dy; x0 += sx; }
+        if (e2 < dy) { err += dx; y0 += sy; }
+    }
+}
+
 void CKernel::box (void) {
 
-	// speed test
 	auto w = m_Screen.GetWidth();
 	auto h = m_Screen.GetHeight();
 	auto c_red = COLOR16 (5, 0, 0);
 	auto c_blue = COLOR16 (0, 0, 5);
 
+    Bresenham(m_Screen, 50, 50, 50, 0, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 75, 50, 0, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 100, 50, 0, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 100, 50, 25, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 100, 50, 50, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 100, 50, 75, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 100, 50, 100, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 75, 50, 100, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 50, 50, 100, COLOR16 (31, 0, 31));
+
+    Bresenham(m_Screen, 50, 25, 50, 0, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 0, 50, 0, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 0, 50, 25, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 0, 50, 50, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 0, 50, 75, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 0, 50, 100, COLOR16 (31, 31, 0));
+    Bresenham(m_Screen, 50, 25, 50, 100, COLOR16 (31, 31, 0));
+
 	// draw rectangle on screen
-	for (unsigned nPosX = 0; nPosX < w; nPosX++)
-	{
-		m_Screen.SetPixel (nPosX, 0, c_blue);
-		m_Screen.SetPixel (nPosX, h-1, c_blue);
-	}
-	for (unsigned nPosY = 0; nPosY < h; nPosY++)
-	{
-		m_Screen.SetPixel (0, nPosY, c_red);
-		m_Screen.SetPixel (w-1, nPosY, c_red);
-	}
+    for (unsigned nPosX = 0; nPosX < w; nPosX++)
+    {
+        m_Screen.SetPixel (nPosX, 0, c_blue);
+        m_Screen.SetPixel (nPosX, h-1, c_blue);
+    }
+    for (unsigned nPosY = 0; nPosY < h; nPosY++)
+    {
+        m_Screen.SetPixel (0, nPosY, c_red);
+        m_Screen.SetPixel (w-1, nPosY, c_red);
+    }
 }
 
 boolean CKernel::Initialize (void)
@@ -117,17 +152,18 @@ TShutdownMode CKernel::Run (void)
 #endif
 
 
-	box();
 
 	m_Screen.CursorMove(10,10);
 	m_Screen.Write("Hello, world",12);
 	m_Screen.CursorMove(1,1);
 
 	// Intro graphic?
-	m_Screen.Write(" ____ ____ ____ ____ \n",22);
+	/*m_Screen.Write(" ____ ____ ____ ____ \n",22);
 	m_Screen.Write("||M |||E |||C |||S ||\n",22);
 	m_Screen.Write("||__|||__|||__|||__||\n",22);
-	m_Screen.Write("|/__\\|/__\\|/__\\|/__\\|\n",22);
+	m_Screen.Write("|/__\\|/__\\|/__\\|/__\\|\n",22);*/
+
+    box();
 
 	//for (unsigned nCount = 0; m_ShutdownMode == ShutdownNone; nCount++)
 	while (m_ShutdownMode == ShutdownNone)
@@ -147,6 +183,10 @@ TShutdownMode CKernel::Run (void)
 void CKernel::KeyPressedHandler (const char *pString)
 {
 	assert (s_pThis != 0);
+	if (*pString == 127) { // backspace
+		s_pThis->m_Screen.DeleteChars(1);
+		return;
+	}
 	s_pThis->m_Screen.Write (pString, strlen (pString));
 }
 
@@ -174,5 +214,5 @@ void CKernel::KeyStatusHandlerRaw (unsigned char ucModifiers, const unsigned cha
 		}
 	}
 
-	s_pThis->m_Logger.Write (FromKernel, LogNotice, Message);
+	s_pThis->m_Logger.Write (FromKernel, LogError, Message);
 }

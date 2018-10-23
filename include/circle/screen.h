@@ -138,8 +138,8 @@ public:
 	void Rotor (unsigned nIndex, unsigned nCount);
 
 	/// \brief Set text cursor position in absolute co-ordinates
-	/// \param nRow  0-based y position
-	/// \param nColumn  0-based x position
+	/// \param nRow  1-based y position
+	/// \param nColumn  1-based x position
 	void CursorMove (unsigned nRow, unsigned nColumn);
 
 	/// \brief Move to next tab position. May start a new line
@@ -147,6 +147,9 @@ public:
 
 	/// \brief Get raw frame buffer
 	TScreenColor* RawFrameBuffer(void);
+
+	/// \brief backspace characters
+	void DeleteChars (unsigned nCount);
 
 private:
 	void Write (char chChar);
@@ -159,7 +162,6 @@ private:
 	void CursorLeft (void);
 	void CursorRight (void);
 	void CursorUp (void);
-	void DeleteChars (unsigned nCount);
 	void DeleteLines (unsigned nCount);
 	void DisplayChar (char chChar);
 	void EraseChars (unsigned nCount);
