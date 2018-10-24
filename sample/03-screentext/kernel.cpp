@@ -26,7 +26,7 @@ static const char FromKernel[] = "kernel";
 
 CKernel::CKernel (void)
 :	m_Memory (TRUE),
-	m_Screen (m_Options.GetWidth (), m_Options.GetHeight ()),
+	m_Screen (800,600),//m_Options.GetWidth (), m_Options.GetHeight ()),
 	m_Logger (m_Options.GetLogLevel ())
 {
 	m_ActLED.Blink (5);	// show we are alive
@@ -69,7 +69,7 @@ TShutdownMode CKernel::Run (void)
 	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
 
 	// show the character set on screen
-	for (char chChar = ' '; chChar <= '~'; chChar++)
+	for (int chChar = 0; chChar < 250; chChar++)
 	{
 		if (chChar % 8 == 0)
 		{

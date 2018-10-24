@@ -50,7 +50,7 @@ public:
 
 	TShutdownMode Run (void);
 
-	void box(void);
+	void DrawLogo(void);
 
 private:
 	static void KeyPressedHandler (const char *pString);
