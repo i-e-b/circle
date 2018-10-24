@@ -17,7 +17,7 @@ static const char FromKernel[] = "kernel";
 CKernel *CKernel::s_pThis = 0;
 
 CKernel::CKernel (void)
-:	m_Screen (m_Options.GetWidth (), m_Options.GetHeight ()),
+:	m_Screen (640, 360), // <-- half-res of 720p widescreen //800,600),//m_Options.GetWidth (), m_Options.GetHeight ()),
 	m_Timer (&m_Interrupt),
 	m_Logger (/*m_Options.GetLogLevel ()*/ TLogSeverity::LogError, &m_Timer),
 	m_DWHCI (&m_Interrupt, &m_Timer),
@@ -33,7 +33,7 @@ CKernel::~CKernel (void)
 	s_pThis = 0;
 }
 
-static void Bresenham(CScreenDevice dev, int x0, int x1, int y0, int y1, TScreenColor color) {
+static void Line(CScreenDevice dev, int x0, int x1, int y0, int y1, TScreenColor color) {
     int dx = x1-x0, sx = x0<x1 ? 1 : -1;
     int dy = y1-y0, sy = y0<y1 ? 1 : -1;
 
@@ -50,6 +50,73 @@ static void Bresenham(CScreenDevice dev, int x0, int x1, int y0, int y1, TScreen
         if (e2 < dy) { err += dx; y0 += sy; }
     }
 }
+void Circle (CScreenDevice dev, int xc, int yc, int radius, TScreenColor color)
+{
+    int x = 0;
+    int y = radius;
+    int delta = 2 - 2 * radius;
+    int error = 0;
+
+    while(y >= 0)
+    {
+        dev.SetPixel(xc + x, yc + y, color);
+        dev.SetPixel(xc - x, yc + y, color);
+        dev.SetPixel(xc + x, yc - y, color);
+        dev.SetPixel(xc - x, yc - y, color);
+
+        error = 2 * (delta + y) - 1;
+        if(delta < 0 && error <= 0) {
+            ++x;
+            delta += 2 * x + 1;
+            continue;
+        }
+        error = 2 * (delta - x) - 1;
+        if(delta > 0 && error > 0) {
+            --y;
+            delta += 1 - 2 * y;
+            continue;
+        }
+        ++x;
+        delta += 2 * (x - y);
+        --y;
+    }
+}
+
+void Ellipse (CScreenDevice dev, int xc, int yc, int width, int height, TScreenColor color)
+{
+    int a2 = width * width;
+    int b2 = height * height;
+    int fa2 = 4 * a2, fb2 = 4 * b2;
+    int x, y, sigma;
+
+    for (x = 0, y = height, sigma = 2*b2+a2*(1-2*height); b2*x <= a2*y; x++)
+    {
+        dev.SetPixel(xc + x, yc + y, color);
+        dev.SetPixel(xc - x, yc + y, color);
+        dev.SetPixel(xc + x, yc - y, color);
+        dev.SetPixel(xc - x, yc - y, color);
+        if (sigma >= 0)
+        {
+            sigma += fa2 * (1 - y);
+            y--;
+        }
+        sigma += b2 * ((4 * x) + 6);
+    }
+
+    for (x = width, y = 0, sigma = 2*a2+b2*(1-2*width); a2*y <= b2*x; y++)
+    {
+        dev.SetPixel(xc + x, yc + y, color);
+        dev.SetPixel(xc - x, yc + y, color);
+        dev.SetPixel(xc + x, yc - y, color);
+        dev.SetPixel(xc - x, yc - y, color);
+        if (sigma >= 0)
+        {
+            sigma += fb2 * (1 - x);
+            x--;
+        }
+        sigma += a2 * ((4 * y) + 6);
+    }
+}
 
 void CKernel::box (void) {
 
@@ -58,23 +125,11 @@ void CKernel::box (void) {
 	auto c_red = COLOR16 (5, 0, 0);
 	auto c_blue = COLOR16 (0, 0, 5);
 
-    Bresenham(m_Screen, 50, 50, 50, 0, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 75, 50, 0, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 100, 50, 0, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 100, 50, 25, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 100, 50, 50, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 100, 50, 75, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 100, 50, 100, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 75, 50, 100, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 50, 50, 100, COLOR16 (31, 0, 31));
-
-    Bresenham(m_Screen, 50, 25, 50, 0, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 0, 50, 0, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 0, 50, 25, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 0, 50, 50, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 0, 50, 75, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 0, 50, 100, COLOR16 (31, 31, 0));
-    Bresenham(m_Screen, 50, 25, 50, 100, COLOR16 (31, 31, 0));
+    Line(m_Screen, 50, 50, 50, 0, COLOR16 (31, 31, 0));
+    Line(m_Screen, 50, 75, 50, 0, COLOR16 (0, 31, 31));
+    Circle(m_Screen, 50, 50 , 25, COLOR16(31,0,31));
+    Ellipse(m_Screen, 150, 50, 25, 50, COLOR16(15,15,31));
+    Ellipse(m_Screen, 150, 50, 50, 25, COLOR16(15,15,31));
 
 	// draw rectangle on screen
     for (unsigned nPosX = 0; nPosX < w; nPosX++)
@@ -154,7 +209,7 @@ TShutdownMode CKernel::Run (void)
 
 
 	m_Screen.CursorMove(10,10);
-	m_Screen.Write("Hello, world",12);
+	m_Screen.Write("x",1);
 	m_Screen.CursorMove(1,1);
 
 	// Intro graphic?
