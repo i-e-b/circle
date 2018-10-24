@@ -30,6 +30,8 @@ extern "C" {
 	void assertion_failed (const char *pExpr, const char *pFile, unsigned nLine);
 
 	#define assert(expr)	((expr)	? ((void) 0) : assertion_failed (#expr, __FILE__, __LINE__))
+
+	#define assertinfo(expr, infstr)    ((expr) ? ((void) 0) : assertion_failed (#expr #infstr, __FILE__, __LINE__))
 #endif
 
 #define ASSERT_STATIC(expr)	extern int assert_static[(expr) ? 1 : -1]

@@ -346,7 +346,7 @@ unsigned CTimer::StartKernelTimer (unsigned nDelay,
 	{
 		TKernelTimer *pTimer2 = (TKernelTimer *) m_KernelTimerList.GetPtr (pElement);
 		assert (pTimer2 != 0);
-		assert (pTimer2->m_nMagic == KERNEL_TIMER_MAGIC);
+		assertinfo (pTimer2->m_nMagic == KERNEL_TIMER_MAGIC, "Kernel timer lost an entry!");
 
 		if ((int) (pTimer2->m_nElapsesAt-nElapsesAt) > 0)
 		{
