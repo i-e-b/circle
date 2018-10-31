@@ -1,0 +1,11 @@
+# Create an empty file
+fallocate -l 100M image.iso
+
+# Format as FAT
+mkfs.fat image.iso
+
+# mount the image writable for all users
+sudo mount -t vfat -ouser,umask=0000 sd-image.iso /mnt/sd
+
+# When finished, unmount
+sudo umount /mnt/sd

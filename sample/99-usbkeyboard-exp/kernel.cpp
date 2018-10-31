@@ -13,12 +13,15 @@
 #include <circle/alloc.h>
 #include <assert.h>
 
+// SD card device name:
+#define PARTITION	"umsd1"
+
 static const char FromKernel[] = "kernel";
 
 CKernel *CKernel::s_pThis = 0;
 
 CKernel::CKernel (void)
-:	m_Screen (1024, 720),
+:	m_Screen (1280, 720),
 	m_Timer (&m_Interrupt),
 	m_Logger (/*m_Options.GetLogLevel ()*/ TLogSeverity::LogError, &m_Timer),
 	m_DWHCI (&m_Interrupt, &m_Timer),
@@ -336,6 +339,47 @@ boolean CKernel::Initialize (void)
 	return bOK;
 }
 
+
+void CKernel::ReadFileSystem(void) {
+
+    // Mount file system
+    CDevice *pPartition = m_DeviceNameService.GetDevice (PARTITION, TRUE);
+    if (pPartition == 0)
+    {
+        m_DeviceNameService.ListDevices (&m_Screen);
+        m_Logger.Write (FromKernel, LogPanic, "Partition not found: %s", PARTITION);
+    }
+
+    if (!m_FileSystem.Mount (pPartition))
+    {
+        m_Logger.Write (FromKernel, LogPanic, "Cannot mount partition: %s", PARTITION);
+    }
+
+    // Show contents of root directory
+    TDirentry Direntry;
+    TFindCurrentEntry CurrentEntry;
+    unsigned nEntry = m_FileSystem.RootFindFirst (&Direntry, &CurrentEntry);
+    for (unsigned i = 0; nEntry != 0; i++)
+    {
+        if (!(Direntry.nAttributes & FS_ATTRIB_SYSTEM))
+        {
+            CString FileName;
+            FileName.Format ("%-14s", Direntry.chTitle);
+
+            m_Screen.Write ((const char *) FileName, FileName.GetLength ());
+
+            if (i % 5 == 4)
+            {
+                m_Screen.Write ("\n", 1);
+            }
+        }
+
+        nEntry = m_FileSystem.RootFindNext (&Direntry, &CurrentEntry);
+    }
+    m_Screen.Write ("\n", 1);
+
+}
+
 TShutdownMode CKernel::Run (void)
 {
 	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
@@ -355,6 +399,9 @@ TShutdownMode CKernel::Run (void)
 #else
 	pKeyboard->RegisterKeyStatusHandlerRaw (KeyStatusHandlerRaw);
 #endif
+
+    ReadFileSystem();
+
 
     m_Screen.Write("Ready > ",8);
 
