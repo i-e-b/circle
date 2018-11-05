@@ -96,6 +96,9 @@ boolean CPartitionManager::Initialize (void)
 		return TRUE;
 	}
 
+
+	CLogger::Get ()->Write (FromPartitionManager, LogWarning, "Reading partition info");
+
 	unsigned nPartition = 0;
 	for (unsigned i = 0; i < MAX_PARTITIONS; i++)
 	{
@@ -108,6 +111,7 @@ boolean CPartitionManager::Initialize (void)
 		{
 			continue;
 		}
+
 
 		assert (m_pPartition[i] == 0);
 		m_pPartition[i] = new CPartition (m_pDevice, MBR.Partition[i].LBAFirstSector, 

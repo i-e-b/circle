@@ -36,6 +36,7 @@
 #include <circle/fs/fat/fatfs.h>
 
 #include <circle/types.h>
+#include "Storage.h"
 
 
 enum TShutdownMode
@@ -79,6 +80,8 @@ private:
 	CDWHCIDevice		m_DWHCI;
 
     CFATFileSystem		m_FileSystem;
+
+    Storage             m_Storage;
 
 	volatile TShutdownMode m_ShutdownMode;
 

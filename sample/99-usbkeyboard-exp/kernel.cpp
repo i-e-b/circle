@@ -23,11 +23,12 @@ static const char FromKernel[] = "kernel";
 CKernel *CKernel::s_pThis = 0;
 
 CKernel::CKernel (void)
-:	m_Screen (1280, 720),
-	m_Timer (&m_Interrupt),
-	m_Logger (/*m_Options.GetLogLevel ()*/ TLogSeverity::LogError, &m_Timer),
-	m_DWHCI (&m_Interrupt, &m_Timer),
-	m_ShutdownMode (ShutdownNone)
+:	  m_Screen (1280, 720)
+	, m_Timer (&m_Interrupt)
+	, m_Logger (m_Options.GetLogLevel () /* TLogSeverity::LogError */, &m_Timer)
+	, m_DWHCI (&m_Interrupt, &m_Timer)
+	, m_Storage(&m_Interrupt, &m_Timer)
+	, m_ShutdownMode (ShutdownNone)
 {
 	s_pThis = this;
 }
@@ -135,13 +136,11 @@ boolean CKernel::Initialize (void)
 {
 	boolean bOK = TRUE;
 
-	if (bOK)
-	{
+	if (bOK) {
 		bOK = m_Screen.Initialize ();
 	}
 
     m_Screen.CursorMove(12,1);
-    // this might be hurting the timer?
     DrawLogo();
 
 	/*if (bOK)
@@ -149,8 +148,7 @@ boolean CKernel::Initialize (void)
 		bOK = m_Serial.Initialize (115200);
 	}*/
 
-	if (bOK)
-	{
+	if (bOK) {
 		CDevice *pTarget = m_DeviceNameService.GetDevice (m_Options.GetLogDevice (), FALSE);
 		if (pTarget == 0)
 		{
@@ -160,22 +158,25 @@ boolean CKernel::Initialize (void)
 		bOK = m_Logger.Initialize (pTarget);
 	}
 
-	if (bOK)
-	{
+	if (bOK) {
 		bOK = m_Interrupt.Initialize ();
 	}
 
-	if (bOK)
-	{
-	    // needed to drive keyboard interrupts
-		bOK = m_Timer.Initialize ();
+	if (bOK) {
+		bOK = m_Timer.Initialize (); // needed to drive keyboard interrupts
 	}
 
-	if (bOK)
-	{
-	    // Wake up USB...
-		bOK = m_DWHCI.Initialize ();
+	if (bOK) {
+		bOK = m_DWHCI.Initialize (); // Wake up USB...
 	}
+
+    if (bOK){
+        boolean bStorage = m_Storage.Initialize(); // ready storage system access
+        if (!bStorage) {
+            m_Logger.Write (FromKernel, LogError, "Storage system didn't load. Try turning the power off and on.");
+            return bStorage;
+        }
+    }
 
 	return bOK;
 }
@@ -241,7 +242,7 @@ TShutdownMode CKernel::Run (void)
 	pKeyboard->RegisterKeyStatusHandlerRaw (KeyStatusHandlerRaw);
 #endif
 
-    ReadFileSystem();
+    //ReadFileSystem();
 
 
     m_Screen.Write("Ready > ",8);
