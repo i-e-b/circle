@@ -132,7 +132,7 @@
 // this option is that the "SpeedFactor" of your system is displayed.
 // You can reduce the time needed for booting, if you disable this.
 
-#define CALIBRATE_DELAY
+//#define CALIBRATE_DELAY
 
 ///////////////////////////////////////////////////////////////////////
 //
