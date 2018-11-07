@@ -23,7 +23,7 @@ static const char FromKernel[] = "kernel";
 CKernel *CKernel::s_pThis = 0;
 
 CKernel::CKernel (void)
-:	  m_Screen (1280, 720)
+:	  m_Screen (1024, 600)
 	, m_Timer (&m_Interrupt)
 	, m_Logger (m_Options.GetLogLevel () /* TLogSeverity::LogError */, &m_Timer)
 	, m_DWHCI (&m_Interrupt, &m_Timer)
