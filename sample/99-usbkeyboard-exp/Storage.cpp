@@ -62,7 +62,7 @@ void Storage::ListDirectories(CScreenDevice* screen) {
         if (!(Direntry.nAttributes & FS_ATTRIB_SYSTEM))
         {
             CString FileName;
-            FileName.Format ("%-14s", Direntry.chTitle);
+            FileName.Format ("%-14s  %d\n", Direntry.chTitle, Direntry.nSize);
 
             screen->Write ((const char *) FileName, FileName.GetLength ());
 

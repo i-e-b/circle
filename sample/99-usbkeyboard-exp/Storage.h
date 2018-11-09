@@ -36,7 +36,7 @@ private:
     CLogger			    *m_Logger;
 
     CEMMCDevice		    m_EMMC;
-    CFATFileSystem		m_FileSystem;
+    CFATFileSystem		m_FileSystem; // circle/fs/fat/fatfs.h
     CDevice             *m_Partition;
 };
 
