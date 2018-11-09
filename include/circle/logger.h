@@ -45,7 +45,7 @@ struct TLogEvent;
 typedef void TLogEventNotificationHandler (void);
 typedef void TLogPanicHandler (void);
 
-class CLogger
+class CLogger: public CDevice
 {
 public:
 	CLogger (unsigned nLogLevel, CTimer *pTimer = 0);	// time is not logged if pTimer is 0
@@ -53,6 +53,8 @@ public:
 
 	boolean Initialize (CDevice *pTarget);
 
+	// device write
+	int Write (const void *pBuffer, unsigned nCount);
 	void Write (const char *pSource, TLogSeverity Severity, const char *pMessage, ...);
 	void WriteV (const char *pSource, TLogSeverity Severity, const char *pMessage, va_list Args);
 
@@ -60,6 +62,9 @@ public:
 	void WriteNoAlloc (const char *pSource, TLogSeverity Severity, const char *pMessage);
 
 	int Read (void *pBuffer, unsigned nCount);
+
+	// returns the resulting offset, (unsigned long long) -1 on error
+	unsigned long long Seek (unsigned long long ullOffset);
 
 	// returns FALSE if event is not available
 	boolean ReadEvent (TLogSeverity *pSeverity, char *pSource, char *pMessage,

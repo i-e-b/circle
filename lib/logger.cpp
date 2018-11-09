@@ -100,6 +100,16 @@ void CLogger::Write (const char *pSource, TLogSeverity Severity, const char *pMe
 	va_end (var);
 }
 
+int CLogger::Write(const void *pBuffer, unsigned nCount)
+{
+	va_list var;
+	
+	WriteV ("", TLogSeverity::LogError, (const char*)pBuffer, var);
+	
+	return 0;
+}
+unsigned long long CLogger::Seek (unsigned long long ullOffset) { return -1; }
+
 void CLogger::WriteV (const char *pSource, TLogSeverity Severity, const char *pMessage, va_list Args)
 {
 	CString Message;

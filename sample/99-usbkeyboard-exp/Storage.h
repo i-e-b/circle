@@ -9,7 +9,7 @@
 #include <circle/actled.h>
 #include <circle/koptions.h>
 #include <circle/devicenameservice.h>
-#include <circle/exceptionhandler.h>
+#include <circle/screen.h>
 #include <circle/interrupt.h>
 #include <circle/timer.h>
 #include <circle/logger.h>
@@ -20,23 +20,24 @@
 class Storage {
 
 public:
-    Storage(CInterruptSystem *interrupt, CTimer *timer);
+    Storage(CInterruptSystem *interrupt, CTimer *timer, CLogger* logger, CDeviceNameService* dns);
     ~Storage (void);
 
     boolean Initialize (void);
 
+    void ListDirectories(CScreenDevice* screen);
+
 private:
 //    CMemorySystem		m_Memory;
     CActLED			    m_ActLED;
-//    CKernelOptions		m_Options;
-//    CDeviceNameService	m_DeviceNameService;
-//    CExceptionHandler	m_ExceptionHandler;
+    CDeviceNameService	*m_DeviceNameService;
     CInterruptSystem	*m_Interrupt;
     CTimer			    *m_Timer;
-    //CLogger			    *m_Logger;
+    CLogger			    *m_Logger;
 
     CEMMCDevice		    m_EMMC;
-//    CFATFileSystem		m_FileSystem;
+    CFATFileSystem		m_FileSystem;
+    CDevice             *m_Partition;
 };
 
 

@@ -14,20 +14,16 @@
 #include <circle/alloc.h>
 #include <assert.h>
 
-// SD card device name when running under QEMU:
-#define PARTITION_QEMU    "umsd1"
-#define PARTITION_RASPI   "emmc1-1"
-
 static const char FromKernel[] = "kernel";
 
 CKernel *CKernel::s_pThis = 0;
 
 CKernel::CKernel (void)
-:	  m_Screen (1024, 600)
+:	  m_Screen (1024, 600) // need to make sure the config.txt file matches this
 	, m_Timer (&m_Interrupt)
 	, m_Logger (m_Options.GetLogLevel () /* TLogSeverity::LogError */, &m_Timer)
 	, m_DWHCI (&m_Interrupt, &m_Timer)
-	, m_Storage(&m_Interrupt, &m_Timer)
+	, m_Storage(&m_Interrupt, &m_Timer, &m_Logger, &m_DeviceNameService)
 	, m_ShutdownMode (ShutdownNone)
 {
 	s_pThis = this;
@@ -181,51 +177,8 @@ boolean CKernel::Initialize (void)
 	return bOK;
 }
 
-
-void CKernel::ReadFileSystem(void) {
-
-    // Mount file system
-    CDevice *pPartition = m_DeviceNameService.GetDevice (PARTITION_QEMU, TRUE);
-    if (pPartition == 0)
-    {
-        m_DeviceNameService.ListDevices (&m_Screen);
-        m_Logger.Write (FromKernel, LogPanic, "Partition not found: %s", PARTITION_QEMU);
-    }
-
-    if (!m_FileSystem.Mount (pPartition))
-    {
-        m_Logger.Write (FromKernel, LogPanic, "Cannot mount partition: %s", PARTITION_QEMU);
-    }
-
-    // Show contents of root directory
-    TDirentry Direntry;
-    TFindCurrentEntry CurrentEntry;
-    unsigned nEntry = m_FileSystem.RootFindFirst (&Direntry, &CurrentEntry);
-    for (unsigned i = 0; nEntry != 0; i++)
-    {
-        if (!(Direntry.nAttributes & FS_ATTRIB_SYSTEM))
-        {
-            CString FileName;
-            FileName.Format ("%-14s", Direntry.chTitle);
-
-            m_Screen.Write ((const char *) FileName, FileName.GetLength ());
-
-            if (i % 5 == 4)
-            {
-                m_Screen.Write ("\n", 1);
-            }
-        }
-
-        nEntry = m_FileSystem.RootFindNext (&Direntry, &CurrentEntry);
-    }
-    m_Screen.Write ("\n", 1);
-
-}
-
 TShutdownMode CKernel::Run (void)
 {
-	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
-
 	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 	if (pKeyboard == 0)
 	{
@@ -233,6 +186,8 @@ TShutdownMode CKernel::Run (void)
 
 		return ShutdownHalt;
 	}
+
+    m_Storage.ListDirectories(&m_Screen);
 
 
 #if 1	// set to 0 to test raw mode
@@ -242,22 +197,17 @@ TShutdownMode CKernel::Run (void)
 	pKeyboard->RegisterKeyStatusHandlerRaw (KeyStatusHandlerRaw);
 #endif
 
-    //ReadFileSystem();
-
 
     m_Screen.Write("Ready > ",8);
 
 
-	//for (unsigned nCount = 0; m_ShutdownMode == ShutdownNone; nCount++)
 	while (m_ShutdownMode == ShutdownNone)
 	{
 		// CUSBKeyboardDevice::UpdateLEDs() must not be called in interrupt context,
 		// that's why this must be done here. This does nothing in raw mode.
 		pKeyboard->UpdateLEDs ();
 
-		//m_Screen.Rotor (0, nCount);
-		//box();
-		m_Timer.MsDelay (500);
+		m_Timer.MsDelay (250);
 	}
 
 	return m_ShutdownMode;
